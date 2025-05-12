@@ -5,6 +5,7 @@ import os
 import plotly.graph_objects as go
 from datetime import datetime
 import numpy as np
+from sklearn.linear_model import LinearRegression
 from Api import GetData  # Assuming this is your custom API module
 
 # List of available companies
@@ -47,8 +48,8 @@ data_dfs = []
 data_folder = "./Data"
 
 for file_name in os.listdir(data_folder):
-    print(file_name)
-    print(selected_company)
+    # print(file_name)
+    # print(selected_company)
     file_path = os.path.join(data_folder, file_name)
     if file_name.split("_")[0] == selected_company:
         df = pd.read_csv(file_path)
@@ -66,6 +67,27 @@ for file_name in os.listdir(data_folder):
                         close=df['close'])])
         
         st.plotly_chart(fig, use_container_width=True)
+        
+        # Make Predictions
+        st.header("Stock Market Metrics Future Prediction:") 
+        model = LinearRegression()
+        X = df[['open', 'high', 'low', 'volume']].values
+        y = df['close']
+
+        model.fit(X,y)
+
+        # Take UserInput:
+        open = st.number_input("Open", min_value=0)
+        high = st.number_input("High", min_value=0)
+        low = st.number_input("Low", min_value=0)
+        volume = st.number_input("Volume", min_value=0)
+        
+        p = model.predict([[open, high, low, volume]])
+        st.write(f"Predicted Close Price: ${p[0]:.2f}")
+
+
+
+
         
         # Add 5 important stock market calculations
         st.header("Key Stock Market Metrics")
